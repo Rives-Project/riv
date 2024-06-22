@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="en-us">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>RIVEMU</title>
+  <link rel="stylesheet" href="index.css">
+  <style>
+    .button,
+    .joystick {
+      position: absolute;
+      background-color: rgba(255, 100, 100, 0.4);
+      z-index: 30;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .button {
+      width: 50px;
+      height: 80px;
+      color: white;
+    }
+
+    .joystick {
+      width: 150px;
+      height: 54px;
+      /* 150 * 0.36 */
+    }
+
+    #canvas {
+      /* display: none; */
+    }
+
+    #gamepad {
+      display: block;
+      margin: 0 auto;
+      max-width: 768px;
+      max-height: 768px;
+      background-color: black;
+      image-rendering: pixelated;
+      outline: none;
+    }
+  </style>
+</head>
+
+<body>
+  <select name="cartridges" id="cartridges" onchange="rivemuUploadCartridge(this.value);" style="display: none"
+    autocomplete="off">
+    <option selected disabled hidden>Select Cartridge</option>
+    <option value="https://raw.githubusercontent.com/edubart/cartridges/main/antcopter.sqfs">GAME - Antcopter</option>
+    <option value="https://raw.githubusercontent.com/edubart/cartridges/main/2048.sqfs">GAME - 2048</option>
+    <option value="https://raw.githubusercontent.com/edubart/cartridges/main/snake.sqfs">GAME - Snake</option>
+    <option value="https://raw.githubusercontent.com/edubart/cartridges/main/freedoom.sqfs">GAME - Freedoom</option>
+    <option value="https://raw.githubusercontent.com/edubart/cartridges/main/monky.sqfs">GAME - Monky</option>
+    <option value="https://raw.githubusercontent.com/edubart/cartridges/main/tetrix.sqfs">GAME - Tetrix</option>
+    <option value="https://raw.githubusercontent.com/edubart/cartridges/main/coins.sqfs">DEMO - coins</option>
+    <option value="https://raw.githubusercontent.com/edubart/cartridges/main/hello-c.sqfs">DEMO - hello-c</option>
+    <option value="https://raw.githubusercontent.com/edubart/cartridges/main/bounce.sqfs">SAMPLE - bounce</option>
+    <option value="https://raw.githubusercontent.com/edubart/cartridges/main/circles.sqfs">SAMPLE - circles</option>
+    <option value="https://raw.githubusercontent.com/edubart/cartridges/main/hello.sqfs">SAMPLE - hello</option>
+    <option value="https://raw.githubusercontent.com/edubart/cartridges/main/lines.sqfs">SAMPLE - lines</option>
+    <option value="https://raw.githubusercontent.com/edubart/cartridges/main/many.sqfs">SAMPLE - many</option>
+    <option value="https://raw.githubusercontent.com/edubart/cartridges/main/particles.sqfs">SAMPLE - particles</option>
+    <option value="https://raw.githubusercontent.com/edubart/cartridges/main/waves.sqfs">SAMPLE - waves</option>
+    <option value="https://raw.githubusercontent.com/edubart/cartridges/main/waveform.sqfs">TOOL - Waveform</option>
+    <option value="https://raw.githubusercontent.com/edubart/cartridges/main/gamepad.sqfs">TOOL - Gamepad</option>
+    <option value="https://raw.githubusercontent.com/edubart/cartridges/main/palette.sqfs">TOOL - Palette</option>
+    <option value="https://raw.githubusercontent.com/edubart/cartridges/main/shapes.sqfs">TOOL - Shapes</option>
+    <option value="https://raw.githubusercontent.com/edubart/cartridges/main/text.sqfs">TOOL - Text</option>
+    <option value="https://raw.githubusercontent.com/edubart/cartridges/main/text-anchor.sqfs">TOOL - Text Anchor
+    </option>
+    <option value="https://raw.githubusercontent.com/edubart/cartridges/main/seqtoy.sqfs">TOOL - Sequencer Toy</option>
+  </select>
+  <div class="canvas-wrapper">
+
+    <div id="gamepad" style="position: relative;">
+      <div id="joystickUp" class="joystick" style="left: 20px; top: 536px; width: 150px; height: 54px;"></div>
+      <div id="joystickDown" class="joystick" style="left: 20px; top: 630px; width: 150px; height: 54px;"></div>
+      <div id="joystickLeft" class="joystick" style="left: 20px; top: 536px; width: 54px; height: 150px;"></div>
+      <div id="joystickRight" class="joystick" style="left: 116px; top: 536px; width: 54px; height: 150px;"></div>
+
+      <div id="buttonS" class="button" style="left: 20px; top: 346px;"></div>
+      <div id="buttonA" class="button" style="left: 20px; top: 391px;"></div>
+      <div id="buttonD" class="button" style="left: 320px; top: 346px;"></div>
+      <div id="buttonF" class="button" style="left: 320px; top: 391px;"></div>
+
+      <div id="buttonW" class="button" style="left: 130px; top: 361px; height: 50px;"></div>
+      <div id="buttonE" class="button" style="left: 220px; top: 361px; height: 50px;"></div>
+
+      <div id="buttonQ" class="button" style="left: 130px; top: 405px; height: 50px;"></div>
+      <div id="buttonR" class="button" style="left: 220px; top: 405px; height: 50px;"></div>
+
+      <div id="buttonV" class="joystick" style="left: 234px; top: 532px; width: 150px; height: 50px;"></div>
+      <div id="buttonZ" class="joystick" style="left: 234px; top: 630px; width: 150px; height: 50px;"></div>
+      <div id="buttonC" class="joystick" style="left: 234px; top: 532px; width: 50px; height: 150px;"></div>
+      <div id="buttonX" class="joystick" style="left: 336px; top: 532px; width: 50px; height: 150px;"></div>
+    </div>
+
+    <canvas id="canvas" tabindex="-1" width="768" height="768" onclick="window.focus()"
+      oncontextmenu="event.preventDefault()"></canvas>
+    <div id="canvas-drop" class="canvas-overlay canvas-noclick" style="display: none">
+      <div>
+        <div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 24 24">
+            <path fill="currentColor" d="m12 16l-5-5l1.4-1.45l2.6 2.6V4h2v8.15l2.6-2.6L17 11zm-8 4v-5h2v3h12v-3h2v5z" />
+          </svg>
+        </div>
+        Drop cartridge .sqfs file
+      </div>
+    </div>
+    <div id="canvas-load" class="canvas-overlay canvas-noclick" style="display: none">
+      <div>
+        <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M12 2A10 10 0 1 0 22 12A10 10 0 0 0 12 2Zm0 18a8 8 0 1 1 8-8A8 8 0 0 1 12 20Z"
+            opacity="0.5" />
+          <path fill="currentColor" d="M20 12h2A10 10 0 0 0 12 2V4A8 8 0 0 1 20 12Z">
+            <animateTransform attributeName="transform" dur="1s" from="0 12 12" repeatCount="indefinite" to="360 12 12"
+              type="rotate" />
+          </path>
+        </svg>
+      </div>
+    </div>
+    <div id="canvas-start" class="canvas-overlay" style="display: none" onclick="rivemuStart()">
+      <div class="svg-button">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16">
+          <path fill="currentColor"
+            d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0M1.5 8a6.5 6.5 0 1 0 13 0a6.5 6.5 0 0 0-13 0m4.879-2.773l4.264 2.559a.25.25 0 0 1 0 .428l-4.264 2.559A.25.25 0 0 1 6 10.559V5.442a.25.25 0 0 1 .379-.215" />
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="content-wrapper">
+    <div id="button-box">
+      <button id="record" title="Record" onclick="rivemuRecord()" disabled autocomplete="off">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M19 12c0 3.86-3.14 7-7 7s-7-3.14-7-7s3.14-7 7-7s7 3.14 7 7" />
+        </svg>
+      </button>
+      <button id="replay" title="Replay" onclick="rivemuReplay()" disabled autocomplete="off">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+          <path fill="currentColor"
+            d="M12 22q-1.875 0-3.512-.712t-2.85-1.925t-1.925-2.85T3 13h2q0 2.925 2.038 4.963T12 20t4.963-2.037T19 13t-2.037-4.962T12 6h-.15l1.55 1.55L12 9L8 5l4-4l1.4 1.45L11.85 4H12q1.875 0 3.513.713t2.85 1.925t1.925 2.85T21 13t-.712 3.513t-1.925 2.85t-2.85 1.925T12 22" />
+        </svg>
+      </button>
+      <button id="stop" title="Stop" onclick="rivemuStop()" disabled autocomplete="off">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M6 18V6h12v12z" />
+        </svg>
+      </button>
+      <button id="pause" title="Toggle Pause" onclick="rivemuPause()" disabled autocomplete="off">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M3 5v14l8-7m2 7h3V5h-3m5 0v14h3V5" />
+        </svg>
+      </button>
+      <button id="change-speed" title="Toggle Speed" onclick="rivemuChangeSpeed()" disabled autocomplete="off">
+        1.0X
+      </button>
+      <button id="fullscreen" title="Fullscreen" onclick="rivemuFullscreen()" autocomplete="off">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M3 21v-5h2v3h3v2zm13 0v-2h3v-3h2v5zM3 8V3h5v2H5v3zm16 0V5h-3V3h5v5z" />
+        </svg>
+      </button>
+      <button id="analyze" title="Analyze" onclick="rivemuToggleAnalysis()" autocomplete="off">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+          <path fill="currentColor"
+            d="M21.71 7.29a1 1 0 0 0-1.42 0L14 13.59l-4.29-4.3a1 1 0 0 0-1.42 0l-6 6a1 1 0 0 0 0 1.42a1 1 0 0 0 1.42 0L9 11.41l4.29 4.3a1 1 0 0 0 1.42 0l7-7a1 1 0 0 0 0-1.42" />
+        </svg>
+      </button>
+    </div>
+    <div id="analysis-box" style="display: none">
+      <div class="row">
+        <div class="column-2">
+          <table>
+            <tr>
+              <th>Status</th>
+              <td><span id="status">Downloading emulator...</span></td>
+            </tr>
+            <tr>
+              <th>Time</th>
+              <td><span id="time">N/A</span></td>
+            </tr>
+            <tr>
+              <th>Frame</th>
+              <td><span id="frame">N/A</span></td>
+            </tr>
+            <tr>
+              <th>Progress</th>
+              <td><span id="progress">N/A</span></td>
+            </tr>
+            <tr>
+              <th>Score</th>
+              <td><span id="score">N/A</span></td>
+            </tr>
+            <tr>
+              <th>Resolution</th>
+              <td><span id="resolution">N/A</span></td>
+            </tr>
+          </table>
+        </div>
+        <div class="column-2">
+          <table>
+            <tr>
+              <th>FPS</th>
+              <td><span id="fps">N/A</span></td>
+            </tr>
+            <tr>
+              <th>CPU Cost</th>
+              <td><span id="cpuCost">N/A</span></td>
+            </tr>
+            <tr>
+              <th>CPU Speed</th>
+              <td><span id="cpuSpeed">N/A</span></td>
+            </tr>
+            <tr>
+              <th>CPU Usage</th>
+              <td><span id="cpuUsage">N/A</span></td>
+            </tr>
+            <tr>
+              <th>CPU Cycles</th>
+              <td><span id="cpuCycles">N/A</span></td>
+            </tr>
+          </table>
+        </div>
+      </div>
+      <table>
+        <tr>
+          <th>Cartridge</th>
+          <td>
+            <span id="carthash">N/A</span> - <span id="cartsize">N/A</span>
+            <button id="upload_cartridge" autocomplete="off" onclick="rivemuUploadCartridge()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+                <path fill="currentColor"
+                  d="M11 16V7.85l-2.6 2.6L7 9l5-5l5 5l-1.4 1.45l-2.6-2.6V16zm-7 4v-5h2v3h12v-3h2v5z" />
+              </svg>
+            </button>
+            <button id="download_cartridge" autocomplete="off" disabled onclick="rivemuDownloadCartridge()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+                <path fill="currentColor"
+                  d="m12 16l-5-5l1.4-1.45l2.6 2.6V4h2v8.15l2.6-2.6L17 11zm-8 4v-5h2v3h12v-3h2v5z" />
+              </svg>
+            </button>
+          </td>
+        </tr>
+        <tr>
+          <th>Tape</th>
+          <td>
+            <span id="tapehash">N/A</span> - <span id="tapesize">N/A</span>
+            <button id="upload_tape" autocomplete="off" onclick="rivemuUploadTape()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+                <path fill="currentColor"
+                  d="M11 16V7.85l-2.6 2.6L7 9l5-5l5 5l-1.4 1.45l-2.6-2.6V16zm-7 4v-5h2v3h12v-3h2v5z" />
+              </svg>
+            </button>
+            <button id="download_tape" disabled autocomplete="off" onclick="rivemuDownloadTape()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+                <path fill="currentColor"
+                  d="m12 16l-5-5l1.4-1.45l2.6 2.6V4h2v8.15l2.6-2.6L17 11zm-8 4v-5h2v3h12v-3h2v5z" />
+              </svg>
+            </button>
+          </td>
+        </tr>
+        <tr>
+          <th>Incard</th>
+          <td>
+            <span id="inhash">N/A</span> - <span id="insize">N/A</span>
+            <button id="upload_incard" autocomplete="off" onclick="rivemuUploadIncard()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+                <path fill="currentColor"
+                  d="M11 16V7.85l-2.6 2.6L7 9l5-5l5 5l-1.4 1.45l-2.6-2.6V16zm-7 4v-5h2v3h12v-3h2v5z" />
+              </svg>
+            </button>
+            <button id="download_incard" disabled autocomplete="off" onclick="rivemuDownloadIncard()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+                <path fill="currentColor"
+                  d="m12 16l-5-5l1.4-1.45l2.6 2.6V4h2v8.15l2.6-2.6L17 11zm-8 4v-5h2v3h12v-3h2v5z" />
+              </svg>
+            </button>
+          </td>
+        </tr>
+        <tr>
+          <th>Outcard</th>
+          <td>
+            <span id="outhash">N/A</span> - <span id="outsize">N/A</span>
+            <button id="download_outcard" disabled autocomplete="off" onclick="rivemuDownloadOutcard()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+                <path fill="currentColor"
+                  d="m12 16l-5-5l1.4-1.45l2.6 2.6V4h2v8.15l2.6-2.6L17 11zm-8 4v-5h2v3h12v-3h2v5z" />
+              </svg>
+            </button>
+          </td>
+        </tr>
+        <tr>
+          <th>Entropy</th>
+          <td>
+            <span id="entropyhash">N/A</span> - <span id="entropysize">N/A</span>
+            <br />
+            <input type="text" id="entropy" autocomplete="off" style="width: 99%" />
+          </td>
+        </tr>
+        <tr>
+          <th>Args</th>
+          <td>
+            <span id="argshash">N/A</span> - <span id="argssize">N/A</span>
+            <br />
+            <input type="text" id="args" autocomplete="off" style="width: 99%" />
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+  <script src="index.js"></script>
+  <script async src="rivemu.js"></script>
+  <script>
+    rivemuUploadCartridge("https://raw.githubusercontent.com/edubart/cartridges/main/gamepad.sqfs")
+  </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const pressed = {};
+
+      const KEY_MAP = {
+        "A": { key: 'a', code: 'KeyA', keyCode: 65, charCode: 97, which: 65, bubbles: true },
+        "D": { key: 'd', code: 'KeyD', keyCode: 68, charCode: 100, which: 68, bubbles: true },
+        "S": { key: 's', code: 'KeyS', keyCode: 83, charCode: 115, which: 83, bubbles: true },
+        "F": { key: 'f', code: 'KeyF', keyCode: 70, charCode: 102, which: 70, bubbles: true },
+        "V": { key: 'v', code: 'KeyV', keyCode: 86, charCode: 118, which: 86, bubbles: true },
+        "X": { key: 'x', code: 'KeyX', keyCode: 88, charCode: 120, which: 88, bubbles: true },
+        "Z": { key: 'z', code: 'KeyZ', keyCode: 90, charCode: 122, which: 90, bubbles: true },
+        "C": { key: 'c', code: 'KeyC', keyCode: 67, charCode: 99, which: 67, bubbles: true },
+        "E": { key: 'e', code: 'KeyE', keyCode: 69, charCode: 101, which: 69, bubbles: true },
+        "W": { key: 'w', code: 'KeyW', keyCode: 87, charCode: 119, which: 87, bubbles: true },
+        "Q": { key: 'q', code: 'KeyQ', keyCode: 81, charCode: 113, which: 81, bubbles: true },
+        "R": { key: 'r', code: 'KeyR', keyCode: 82, charCode: 114, which: 82, bubbles: true },
+        "ArrowUp": { key: 'ArrowUp', code: 'ArrowUp', keyCode: 38, charCode: 0, which: 38, bubbles: true },
+        "ArrowDown": { key: 'ArrowDown', code: 'ArrowDown', keyCode: 40, charCode: 0, which: 40, bubbles: true },
+        "ArrowLeft": { key: 'ArrowLeft', code: 'ArrowLeft', keyCode: 37, charCode: 0, which: 37, bubbles: true },
+        "ArrowRight": { key: 'ArrowRight', code: 'ArrowRight', keyCode: 39, charCode: 0, which: 39, bubbles: true }
+      };
+
+
+      const handleButtonPressIn = (key) => {
+        if (pressed[key]) return;
+        pressed[key] = true;
+        setPressed(key, true);
+      };
+
+      const handleButtonPressOut = (key) => {
+        if (!pressed[key]) return;
+        pressed[key] = false;
+        setPressed(key, false);
+      };
+
+      const setPressed = (key, isPressed) => {
+        const k = KEY_MAP[key];
+        const event = new KeyboardEvent(isPressed ? 'keydown' : 'keyup', k);
+        document.dispatchEvent(event);
+        document.body.style.backgroundColor = isPressed ? `rgb(100,100,${Math.floor(Math.random() * 255)})` : 'rgb(100,100,100)';
+      };
+
+      const endTouches = (touches) => {
+        const pressed = {
+        };
+
+        for (let i = 0; i < touches.length; i++) {
+          touch = touches[i];
+          const { clientX: x, clientY: y } = touch;
+          document.querySelectorAll('.button, .joystick').forEach(el => {
+            const rect = el.getBoundingClientRect();
+            if (x > rect.left && x < rect.right && y > rect.top && y < rect.bottom) {
+              const key = el.id.replace('button', '').replace('joystick', 'Arrow');
+              pressed[key] = false;
+            }
+          });
+        }
+
+        console.log(pressed)
+        for (const key in pressed) {
+          if (pressed[key]) handleButtonPressIn(key);
+          else handleButtonPressOut(key);
+        }
+      };
+
+      const updateTouches = (touches, ending) => {
+        const pressed = {
+          S: false,
+          A: false,
+          D: false,
+          F: false,
+          V: false,
+          X: false,
+          Z: false,
+          C: false,
+          E: false,
+          W: false,
+          Q: false,
+          R: false,
+          ArrowRight: false,
+          ArrowLeft: false,
+          ArrowDown: false,
+          ArrowUp: false
+        };
+
+        for (let i = 0; i < touches.length; i++) {
+          touch = touches[i];
+          const { clientX: x, clientY: y } = touch;
+          document.querySelectorAll('.button, .joystick').forEach(el => {
+            const rect = el.getBoundingClientRect();
+            if (x > rect.left && x < rect.right && y > rect.top && y < rect.bottom) {
+              const key = el.id.replace('button', '').replace('joystick', 'Arrow');
+              pressed[key] = true;
+            }
+          });
+        }
+
+        console.log(pressed)
+        for (const key in pressed) {
+          if (pressed[key]) handleButtonPressIn(key);
+          else handleButtonPressOut(key);
+        }
+      };
+
+      document.addEventListener('touchstart', (e) => {
+        const touches = e.touches;
+        console.log(`Number of touches starting: ${touches.length}`);
+        updateTouches(touches);
+      }, false);
+
+      document.addEventListener('touchmove', (e) => {
+        const touches = e.touches;
+        console.log(`Number of touches moving: ${touches.length}`);
+        updateTouches(touches);
+      }, false);
+
+      document.addEventListener('touchend', () => {
+        const touches = event.changedTouches;
+        console.log(`Number of touches ending: ${touches.length}`);
+        endTouches(touches, true);
+      });
+    });
+
+
+  </script>
+  <!-- <script>
+    async function sha256sum(data) {
+    }
+  </script> -->
+</body>
+
+</html>

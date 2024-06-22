@@ -97,10 +97,15 @@ Module.onRuntimeInitialized = function(status) {
 
 // Return SHA256 hexadecimal string from a chunk of data.
 async function sha256sum(data) {
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-  return hashHex;
+  try {
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+    return hashHex;
+  } catch(e) {
+    console.error(e)
+    return "";
+  }
 }
 
 // Show an element.
